@@ -1,0 +1,90 @@
+<project>
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.4.4</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>be.sgerard.demoa.service</groupId>
+    <artifactId>be.sgerard.demoa.service.parent</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+    <name>demoa-service-parent</name>
+    <description>Parent POM for Demoa services</description>
+
+    <properties>
+        <java.version>11</java.version>
+        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>11</maven.compiler.source>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <service.name/>
+        <service.image.version>${git.commit.id.abbrev}.${git.commit.time}</service.image.version>
+        <service.image.base-name>demoa/${service.name}</service.image.base-name>
+        <service.image.name>${service.image.base-name}:${service.image.version}</service.image.name>
+        <service.image.latest>${service.image.base-name}:latest</service.image.latest>
+    </properties>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>pl.project13.maven</groupId>
+                    <artifactId>git-commit-id-plugin</artifactId>
+                    <version>2.2.4</version>
+                    <configuration>
+                        <dateFormat>yyyyMMdd-HHmmss</dateFormat>
+                        <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
+                        <generateGitPropertiesFile>false
+                        </generateGitPropertiesFile>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <phase>validate</phase>
+                            <goals>
+                                <goal>revision</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>io.fabric8</groupId>
+                    <artifactId>docker-maven-plugin</artifactId>
+                    <version>0.35.0</version>
+                    <configuration>
+                        <images>
+                            <image>
+                                <name>${service.image.name}</name>
+                                <build>
+                                    <tags>
+                                        <tag>latest</tag>
+                                    </tags>
+                                </build>
+                            </image>
+                        </images>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>build-docker-image</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>build</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>2.8.2</version>
+                    <configuration>
+                        <skip>true</skip>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+</project>
