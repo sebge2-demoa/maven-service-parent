@@ -26,7 +26,24 @@
         <service.image.base-name>demoa/${service.name}</service.image.base-name>
         <service.image.name>${service.image.base-name}:${service.image.version}</service.image.name>
         <service.image.latest>${service.image.base-name}:latest</service.image.latest>
+        <aws.account-id></aws.account-id>
+        <aws.env-name></aws.env-name>
+        <service.image.registry>${aws.account-id}.dkr.ecr.eu-central-1.amazonaws.com</service.image.registry>
     </properties>
+
+    <profiles>
+        <profile>
+            <id>prod</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+
+            <properties>
+                <aws.account-id>712777222880</aws.account-id>
+                <aws.env-name>prod</aws.env-name>
+            </properties>
+        </profile>
+    </profiles>
 
     <build>
         <pluginManagement>
@@ -82,6 +99,24 @@
                     <version>2.8.2</version>
                     <configuration>
                         <skip>true</skip>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>be.sgerard.demoa.plugin</groupId>
+                    <artifactId>be.sgerard.demoa.plugin.k8s-image-plugin</artifactId>
+                    <version>1.0.0-SNAPSHOT</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>deploy</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <imageBaseName>${service.image.base-name}</imageBaseName>
+                        <imageVersion>${service.image.version}</imageVersion>
+                        <imageRegistry>${service.image.registry}</imageRegistry>
+                        <awsEnvName>${aws.env-name}</awsEnvName>
                     </configuration>
                 </plugin>
             </plugins>
