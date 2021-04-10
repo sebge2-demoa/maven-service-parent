@@ -21,14 +21,15 @@
         <maven.compiler.source>11</maven.compiler.source>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
+        <aws.account-id></aws.account-id>
+        <aws.env-name></aws.env-name>
         <service.name/>
         <service.image.version>${git.commit.id.abbrev}.${git.commit.time}</service.image.version>
         <service.image.base-name>demoa/${service.name}</service.image.base-name>
         <service.image.name>${service.image.base-name}:${service.image.version}</service.image.name>
         <service.image.latest>${service.image.base-name}:latest</service.image.latest>
-        <aws.account-id></aws.account-id>
-        <aws.env-name></aws.env-name>
         <service.image.registry>${aws.account-id}.dkr.ecr.eu-central-1.amazonaws.com</service.image.registry>
+        <eks.deployment.skip>false</eks.deployment.skip>
     </properties>
 
     <profiles>
@@ -68,32 +69,6 @@
                     </executions>
                 </plugin>
                 <plugin>
-                    <groupId>io.fabric8</groupId>
-                    <artifactId>docker-maven-plugin</artifactId>
-                    <version>0.35.0</version>
-                    <configuration>
-                        <images>
-                            <image>
-                                <name>${service.image.name}</name>
-                                <build>
-                                    <tags>
-                                        <tag>latest</tag>
-                                    </tags>
-                                </build>
-                            </image>
-                        </images>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <id>build-docker-image</id>
-                            <phase>package</phase>
-                            <goals>
-                                <goal>build</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
                     <version>2.8.2</version>
@@ -107,17 +82,30 @@
                     <version>1.0.0-SNAPSHOT</version>
                     <executions>
                         <execution>
+                            <id>image-package</id>
+                            <goals>
+                                <goal>package</goal>
+                            </goals>
+                            <configuration>
+                                <imageBaseName>${service.image.base-name}</imageBaseName>
+                                <imageVersion>${service.image.version}</imageVersion>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>image-deploy</id>
                             <goals>
                                 <goal>deploy</goal>
                             </goals>
+                            <configuration>
+                                <imageBaseName>${service.image.base-name}</imageBaseName>
+                                <imageVersion>${service.image.version}</imageVersion>
+                                <imageRegistry>${service.image.registry}</imageRegistry>
+                                <awsEnvName>${aws.env-name}</awsEnvName>
+                                <eksServiceName>${service.name}</eksServiceName>
+                                <eksSkipDeployment>${eks.deployment.skip}</eksSkipDeployment>
+                            </configuration>
                         </execution>
                     </executions>
-                    <configuration>
-                        <imageBaseName>${service.image.base-name}</imageBaseName>
-                        <imageVersion>${service.image.version}</imageVersion>
-                        <imageRegistry>${service.image.registry}</imageRegistry>
-                        <awsEnvName>${aws.env-name}</awsEnvName>
-                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
